@@ -1,23 +1,33 @@
 package org.example.expert.domain.todo.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.RequiredArgsConstructor;
 import org.example.expert.domain.todo.entity.Todo;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Optional;
 
-public abstract class TodoRepositoryImpl implements TodoRepositoryCustom {
+import static org.example.expert.domain.todo.entity.QTodo.todo;
+
+@Repository
+@RequiredArgsConstructor
+public class TodoRepositoryCustomImpl implements TodoRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
-    public TodoRepositoryImpl(JPAQueryFactory queryFactory) {
-        this.queryFactory = queryFactory;
+    @Override
+    public Optional<Todo> findByIdWithUser(Long todoId){
+        Todo results = queryFactory
+                .select(todo)
+                .from(todo)
+                .leftJoin(todo.user).fetchJoin()
+                .where(todo.id.eq(todoId))
+                .fetchOne();
+
+        return Optional.ofNullable(results);
     }
 
-    @Override
+/*    @Override
     public Page<Todo> findAllByWeatherAndCreatedAtRange(String weather, LocalDateTime startCreatedAt, LocalDateTime endCreatedAt, Pageable pageable) {
         QTodo todo = QTodo.todo;
         QUser user = QUser.user;
@@ -42,6 +52,6 @@ public abstract class TodoRepositoryImpl implements TodoRepositoryCustom {
                 .fetchOne();
 
         return new PageImpl<>(results, pageable, total);
-    }
+    }*/
 }
 
